@@ -1,21 +1,56 @@
 from django.shortcuts import render, redirect
-from accounts.forms import UserRegistrationForm
+# from accounts.forms import UserRegisterForm
+from .forms import UserRegisterForm, UserLoginForm
+from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+
+
+# def register(request):
+#     context={}
+#     if request.POST:
+#         form=UserRegistrationForm(request.POST)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('login')
+#         context['register_form']=form
+
+#     else:
+#         form=UserRegistrationForm()
+#         context['register_form']=form
+#     return render(request, "account/register.html")
+
+
+# def login_view(request):
+#     return render(request, "account/login.html")
+
 
 
 def register(request):
-    context={}
-    if request.POST:
-        form=UserRegistrationForm(request.POST)
+    if request.method == 'POST':
+        form = UserRegisterForm(request.POST)
         if form.is_valid():
             form.save()
+            # email = form.cleaned_data.get('email')
+            # messages.success(request, f'Account created for {email}!')
             return redirect('login')
-        context['register_form']=form
-
     else:
-        form=UserRegistrationForm()
-        context['register_form']=form
-    return render(request, "account/signup.html")
-
+        form = UserRegisterForm()
+    return render(request, 'accounts/register.html', {'form': form})
 
 def login_view(request):
-    return render(request, "accounts/login.html")
+    if request.POST:
+        form = UserLoginForm(request.POST)
+        
+        if form.is_valid():
+            email=request.POST['email']
+            phone=request.POST['phone']
+            password=request.POST['password']
+            user = authenticate(request, email=email, phone=phone, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+    else:
+        form=UserLoginForm()
+
+    return render(request, "accounts/login.html", {'form': form})

@@ -3,27 +3,25 @@ from django.contrib.auth.models import AbstractUser, BaseUserManager
 from allauth.account.forms import SignupForm
 
 class MyUserManager(BaseUserManager):
-    def create_user(self, email,  username, phone, password=None):
-        if not email:
+    def create_user(self, email, phone, password=None):
+        if not email or phone:
             raise ValueError('email is required')
-        if not username:
-            raise ValueError('username is required')
+   
         if not phone:
             raise ValueError('phone number is required')
 
         user=self.model(
             email=self.normalize_email(email),
-            username = username,
+          
             phone=phone     
         )
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email, username, phone, password=None):
+    def create_superuser(self, email, phone, password=None):
         user=self.create_user(
             email=self.normalize_email(email),
-            username=username,
             phone=phone,
             password=password
         )
@@ -35,8 +33,7 @@ class MyUserManager(BaseUserManager):
 
 class MyUser(AbstractUser):
     email = models.EmailField(('email address'), max_length=60,unique=True)
-    username = models.CharField(verbose_name="username",max_length=60, unique=True)
-    phone = models.CharField(('phone'), max_length=12, unique=True)
+    phone = models.CharField(('phone'), max_length=70, unique=True)
     date_joined=models.DateTimeField(verbose_name="date time", auto_now_add=True)
     last_login=models.DateTimeField(verbose_name="date time", auto_now_add=True)
     is_admin = models.BooleanField(default=False)
@@ -45,13 +42,13 @@ class MyUser(AbstractUser):
     is_superuser = models.BooleanField(default=False)
 
     USERNAME_FIELD = 'email' or 'phone'
-    REQUIRED_FIELDS = [ 'username', 'phone', ]
+    REQUIRED_FIELDS = [ 'phone', ]
 
     objects=MyUserManager()
 
     # objects = CustomUserManager()
     def __str__(self):
-        return self.username
+        return self.email
 
     def has_perm(self, perm, obj=None):
         return True

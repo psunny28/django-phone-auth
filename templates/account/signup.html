@@ -1,8 +1,11 @@
+{% load account %}
+
+{% user_display user %}
+
 <h2>Sign Up</h2>
 <form method="post">
-  {% csrf_token %}
-  {{ form.as_table }}
-  {{ form.as_p }}
+  
+  {{  form }}
 
   <button type="submit">Sign Up</button>
 </form>
